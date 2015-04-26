@@ -1,0 +1,12 @@
+OASISFormat: 0.4
+Name:        merkel
+Version:     0.1
+Synopsis:    merkel tree hash calculator
+Authors:     Kellen Fox
+License:     FreeBSD
+
+Executable merkel
+  Path:       .
+  BuildTools: ocamlbuild
+  MainIs:     merkel.ml
+  BuildDepends: sha.sha256
