@@ -1,7 +1,11 @@
+let usage = "usage: " ^ Sys.argv.(0) ^ " filename"
+
+let buffsize = ref 1024;;
+
+
 let merkel_chan chan =
-    let buffsize = 256 in
+    let buffsize = !buffsize in
     let chanlen = in_channel_length chan in
-    print_endline ("created buffer, channel len: " ^ string_of_int chanlen) ;
     let hash_block take =
       Sha256.to_hex (Sha256.channel chan take) in
 
@@ -35,16 +39,23 @@ let merkel_chan chan =
       merkel_loop hashlist output in
 
     while List.length !hashes > 1 do
-        print_endline "round";
+        (*print_endline ("round: " ^ (string_of_int (List.length !hashes))); *)
         hashes := merkel !hashes
     done;
 
     List.iter print_endline !hashes;;
 
 let merkel_hash_file filename =
-    let chan = open_in filename in
-    print_endline "In read fn";
-    merkel_chan chan;
-    close_in chan;;
+    if Sys.file_exists filename && not (Sys.is_directory filename) then
+      let chan = open_in filename in
+      merkel_chan chan;
+      close_in chan
+    else
+      ();;
 
-let () = merkel_hash_file (Array.get Sys.argv 1);;
+let speclist = [
+    ("-b", Arg.Int (fun d -> buffsize := d), ": set the buffersize");
+  ]
+
+let () =
+    Arg.parse speclist merkel_hash_file usage;;
